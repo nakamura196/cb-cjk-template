@@ -7,3 +7,16 @@ custom-foot: js/map-js.html
 {% if clean_content != "" %}<div class="container my-4">{{ content }}</div>{% endif %}
 <h2 class="visually-hidden">Map of Collection Items</h2>
 <div id="mapContainer"></div>
+<script>
+/* Fill the window below the header instead of a fixed 750px.
+   The footer comes after scrolling past the map. */
+(function () {
+    var el = document.getElementById('mapContainer');
+    function fit() {
+        var top = el.getBoundingClientRect().top + window.scrollY;
+        el.style.height = Math.max(420, window.innerHeight - top) + 'px';
+    }
+    fit();
+    window.addEventListener('resize', fit);
+})();
+</script>
