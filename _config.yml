@@ -77,3 +77,8 @@ exclude: [docs/, Rakefile, rakelib/, README.md, LICENSE, CITATION.cff, CODE_OF_C
 # compress CSS output
 sass:
   style: compressed
+  silence_deprecations: [if-function]
+
+# CJK search variant normalization (cjk-search_cb-add-on)
+cjk_index:
+  variants: [ja, zh]

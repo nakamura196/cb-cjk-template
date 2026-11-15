@@ -1,0 +1,31 @@
+---
+# IIIF item layout (static-iiif_cb-add-on)
+# Shows the item in Universal Viewer, from a IIIF manifest:
+# - the item's `manifest` field, if it has one (a manifest from elsewhere), or
+# - the manifest the static_iiif plugin made from the item's own images: its
+#   object_location or, for a compound object, the object_location of each child row.
+# An item without either is shown like the "image" layout.
+# Use it by setting the item's display_template to "iiif" in the metadata CSV.
+layout: item/item-page-base
+gallery: true
+---
+{%- assign iiif_made = page.objectid | iiif_manifest -%}
+{%- assign iiif_has_manifest = iiif_made | default: page.manifest -%}
+{%- if iiif_has_manifest and iiif_has_manifest != "" -%}
+
+{% include feature/iiif-viewer.html %}
+
+<div class="text-center mb-4">
+    {% include item/download-buttons.html %}
+</div>
+
+{%- else -%}
+
+<div class="card mb-4 text-center">
+    {% include item/image-gallery.html %}
+    <div class="card-body">
+        {% include item/download-buttons.html %}
+    </div>
+</div>
+
+{%- endif -%}

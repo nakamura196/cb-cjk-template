@@ -1,0 +1,56 @@
+{% comment %}
+
+    Show a IIIF manifest in Universal Viewer (https://github.com/UniversalViewer/universalviewer),
+    with a link to the manifest itself and a button to open it in Mirador.
+    Works on item pages (the "iiif" item layout uses it) and on any content page.
+
+    The manifest is, in order: the `manifest` option; the manifest that the static_iiif plugin
+    made for the `objectid` option; on an item page, the item's `manifest` field, then the
+    manifest made for the item. If there is none, nothing is shown.
+
+    E.G. --> {% include feature/iiif-viewer.html objectid="demo_013" %}
+    E.G. --> {% include feature/iiif-viewer.html manifest="https://iiif.wellcomecollection.org/presentation/v3/b18035723" height="500" %}
+
+    Options:
+    - "objectid" = the objectid of an item whose manifest the static_iiif plugin made
+    - "manifest" = the URL of any IIIF manifest (relative to the site, or a full URL)
+    - "height" = height of the viewer in pixels, default "668"
+    - "id" = id of the viewer's div, default "uv"; give each viewer its own id if a page has more than one
+    - "buttons" = "false" to leave out the manifest link and the Mirador button
+
+{% endcomment %}
+{%- assign iiif_manifest_url = include.manifest -%}
+{%- if include.objectid -%}
+{%- assign iiif_made = include.objectid | iiif_manifest -%}
+{%- assign iiif_manifest_url = iiif_manifest_url | default: iiif_made -%}
+{%- else -%}
+{%- assign iiif_manifest_url = iiif_manifest_url | default: page.manifest -%}
+{%- if page.objectid -%}
+{%- assign iiif_made = page.objectid | iiif_manifest -%}
+{%- assign iiif_manifest_url = iiif_manifest_url | default: iiif_made -%}
+{%- endif -%}
+{%- endif -%}
+{%- if iiif_manifest_url and iiif_manifest_url != "" -%}
+{%- assign iiif_manifest_url = iiif_manifest_url | relative_url -%}
+{%- assign uv_id = include.id | default: "uv" -%}
+{%- unless iiif_uv_loaded -%}
+{%- assign iiif_uv_loaded = true -%}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/universalviewer@4.4.4/dist/uv.css"/>
+<script src="https://cdn.jsdelivr.net/npm/universalviewer@4.4.4/dist/umd/UV.js"></script>
+{%- endunless %}
+<div class="iiif-viewer mb-4">
+    <div class="uv" id="{{ uv_id }}" style="width: 100%; height: {{ include.height | default: '668' }}px;"></div>
+    {%- unless include.buttons == "false" %}
+    <div class="d-flex flex-wrap gap-2 justify-content-center my-3">
+        <a class="btn btn-outline-dark" href="{{ iiif_manifest_url }}" target="_blank" rel="noopener">IIIF Manifest</a>
+        {%- assign iiif_absolute = iiif_manifest_url | absolute_url -%}
+        {%- if iiif_absolute contains "://" %}
+        <a class="btn btn-outline-dark" href="https://projectmirador.org/embed/?iiif-content={{ iiif_absolute | url_encode }}" target="_blank" rel="noopener">Open in Mirador</a>
+        {%- endif %}
+    </div>
+    {%- endunless %}
+</div>
+<script>
+    UV.init({{ uv_id | jsonify }}, { manifest: {{ iiif_manifest_url | jsonify }} });
+</script>
+{%- endif -%}
